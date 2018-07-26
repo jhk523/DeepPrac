@@ -44,7 +44,7 @@ def maybe_download_and_extract():
 
 def _read_one_batch(path, is_random_label):
     fo = open(path, 'rb')
-    dicts = pickle.load(fo)
+    dicts = pickle.load(fo, encoding='latin1')
     fo.close()
 
     data = dicts['data']
