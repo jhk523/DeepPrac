@@ -2,3 +2,7 @@ cifar10_data/
 __pycache__/
 .idea/
 *.swp
+train/
+test/
+val/
+annotations/
