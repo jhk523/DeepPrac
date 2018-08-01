@@ -6,3 +6,5 @@ train/
 test/
 val/
 annotations/
+*.npy
+*.png
