@@ -30,15 +30,30 @@ def conv2d(x,W):
 def maxPool2d(x):
     return tf.nn.max_pool(x,ksize=[1,2,2,1],strides=[1,2,2,1],padding="SAME")
 
+def conv_seq(input_thing, layer_in, layer_out):
+    wConv = initWeight([5,5,layer_in, layer_out])
+    bConv = initBias([layer_out])
+    conv = conv2d(input_thing, wConv)
+    bias = conv + bConv
+    relu = tf.nn.relu(bias)
+    pool = maxPool2d(relu)
+
+    return wConv, bConv, relu, pool
 
 batchsize = 50;
 imagesize = 32;
 colors = 3;
+keepProb = tf.placeholder("float");
 
 sess = tf.InteractiveSession()
 
 img = tf.placeholder("float",shape=[None,imagesize,imagesize,colors])
 lbl = tf.placeholder("float",shape=[None,10])
+
+wConv1, bConv1, relu1, pool1 = conv_seq(img, colors, 32)
+wConv2, bConv2, relu2, pool2 = conv_seq(pool1, 32, 64)
+
+'''
 # for each 5x5 area, check for 32 features over 3 color channels
 wConv1 = initWeight([5,5,colors,32])
 bConv1 = initBias([32])
@@ -57,6 +72,8 @@ conv2 = conv2d(pool1,wConv2)
 bias2 = conv2 + bConv2
 relu2 = tf.nn.relu(bias2)
 pool2 = maxPool2d(relu2)
+'''
+
 # fully-connected is just a regular neural net: 8*8*64 for each training data
 wFc1 = initWeight([int(imagesize/4) * int(imagesize/4) * 64, 1024])
 bFc1 = initBias([1024])
@@ -66,10 +83,10 @@ pool2flat = tf.reshape(pool2, [-1, int(imagesize/4) * int(imagesize/4) *64])
 fc1 = tf.matmul(pool2flat,wFc1) + bFc1;
 relu3 = tf.nn.relu(fc1);
 # dropout removes duplicate weights
-keepProb = tf.placeholder("float");
 drop = tf.nn.dropout(relu3,keepProb);
 wFc2 = initWeight([1024,10]);
 bFc2 = initWeight([10]);
+
 # softmax converts individual probabilities to percentages
 guesses = tf.nn.softmax(tf.matmul(drop, wFc2) + bFc2);
 # how wrong it is
